@@ -45,7 +45,16 @@ function resetEnvDyldVar(oldEnvVar) {
   }
 }
 
-const reloadApp = async (params) => {
+let initialized = false;
+let detoxVersion;
+let oldEnvVar;
+
+const init = () => {
+  if (initialized) {
+    return;
+  }
+
+  initialized = true;
   if (!fs.existsSync(expoDetoxHookPackageJsonPath)) {
     throw new Error("expo-detox-hook is not installed in this directory. You should declare it in package.json and run `npm install`");
   }
@@ -56,13 +65,16 @@ const reloadApp = async (params) => {
     throw new Error ("expo-detox-hook is not installed in your osx Library. Run `npm install -g expo-detox-cli && expotox clean-framework-cache && expotox build-framework-cache` to fix this.");
   }
 
-  const detoxVersion = getDetoxVersion();
-  const oldEnvVar = process.env.SIMCTL_CHILD_DYLD_INSERT_LIBRARIES;
+  detoxVersion = getDetoxVersion();
+  oldEnvVar = process.env.SIMCTL_CHILD_DYLD_INSERT_LIBRARIES;
 
   if (semver.gte(detoxVersion, '9.0.6')) {
     process.env.SIMCTL_CHILD_DYLD_INSERT_LIBRARIES = expoDetoxHookFrameworkPath;
   }
+};
 
+const reloadApp = async (params) => {
+  init();
   const formattedBlacklistArg = await blacklistCmdlineFormat(params && params.urlBlacklist);
   const url = await getAppUrl();
   await device.launchApp({
@@ -121,5 +133,6 @@ module.exports = {
   getAppUrl,
   getAppHttpUrl,
   blacklistLiveReloadUrl,
+  init,
   reloadApp,
 };
