@@ -6,7 +6,7 @@
   "devDependencies": {},
   "dependencies": {
     "child-process-promise": "^2.2.1",
-    "xdl": "^51.5.0",
+    "@expo/xdl": "^59.0.14",
     "semver": "^5.6.0"
   }
 }
